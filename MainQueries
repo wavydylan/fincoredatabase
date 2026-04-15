@@ -29,11 +29,11 @@ GROUP BY MONTH(Payment_date)
 ORDER BY Month;
 
 -- 5. Customer Purchase History
-SELECT c.Name, s.Sale_ID, s.Sale_date, s.Total_amount, p.Payment_status
+SELECT c.Name, s.Sale_ID, s.Date, s.Total_amount, p.Payment_status
 FROM Customer c
 JOIN Sales s ON c.Customer_ID = s.Customer_ID
 JOIN Payments p ON s.Sale_ID = p.Sale_ID
-ORDER BY c.Name, s.Sale_date DESC;
+ORDER BY c.Name, s.Date DESC;
 
 -- 6. Most Sold Products
 SELECT p.Product_name, SUM(sp.Quantity) AS Total_Sold
@@ -43,12 +43,12 @@ GROUP BY p.Product_ID
 ORDER BY Total_Sold DESC;
 
 -- 7. Outstanding Payments
-SELECT c.Name, s.Sale_ID, s.Sale_date, p.Amount_paid, p.Payment_status
+SELECT c.Name, s.Sale_ID, s.Date, p.Amount_paid, p.Payment_status
 FROM Payments p
 JOIN Sales s ON p.Sale_ID = s.Sale_ID
 JOIN Customer c ON s.Customer_ID = c.Customer_ID
 WHERE p.Payment_status = 'Pending'
-ORDER BY s.Sale_date ASC;
+ORDER BY s.Date ASC;
 
 -- 8. Expenses Breakdown by Category
 SELECT Category, SUM(Amount) AS Total, MONTH(Date) AS Month
