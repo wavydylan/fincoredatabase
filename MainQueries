@@ -1,7 +1,6 @@
 -- 1. Total Monthly Revenue
 SELECT MONTH(Payment_date) AS Month, SUM(Amount_paid) AS Total_Revenue
 FROM Payments
-WHERE YEAR(Payment_date) = YEAR(CURDATE())
 GROUP BY MONTH(Payment_date)
 ORDER BY Month;
 
