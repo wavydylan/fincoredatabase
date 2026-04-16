@@ -1,0 +1,1 @@
+Files for database management project, fincore(2).sql has all the data with 15 data values in each table, the mainQueries has the eight main queries that'll be beneficial to the project. If there is anything that needs to bed added please feel free to make the change.
