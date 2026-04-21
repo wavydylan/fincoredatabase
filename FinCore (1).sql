@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Apr 18, 2026 at 01:46 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: 127.0.0.1
+-- Generation Time: Apr 21, 2026 at 11:50 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,16 +18,16 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `FinCore`
+-- Database: `fincoreupdate`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Accounts_Payable`
+-- Table structure for table `accounts_payable`
 --
 
-CREATE TABLE `Accounts_Payable` (
+CREATE TABLE `accounts_payable` (
   `AP_ID` int(11) NOT NULL,
   `Vendor_Name` varchar(100) NOT NULL,
   `Expense_ID` int(11) DEFAULT NULL,
@@ -39,20 +39,20 @@ CREATE TABLE `Accounts_Payable` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Accounts_Payable`
+-- Dumping data for table `accounts_payable`
 --
 
-INSERT INTO `Accounts_Payable` (`AP_ID`, `Vendor_Name`, `Expense_ID`, `Amount_Owed`, `Due_Date`, `Payment_Status`, `Payment_Date`, `Notes`) VALUES
+INSERT INTO `accounts_payable` (`AP_ID`, `Vendor_Name`, `Expense_ID`, `Amount_Owed`, `Due_Date`, `Payment_Status`, `Payment_Date`, `Notes`) VALUES
 (1, 'Office Depot', 1, 150.00, '2026-04-10', 'Paid', '2026-04-08', 'Supplies'),
 (2, 'Tech Supplier Inc.', 2, 500.00, '2026-04-15', 'Unpaid', NULL, 'Equipment purchase');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Accounts_Receivable`
+-- Table structure for table `accounts_receivable`
 --
 
-CREATE TABLE `Accounts_Receivable` (
+CREATE TABLE `accounts_receivable` (
   `AR_ID` int(11) NOT NULL,
   `Customer_ID` int(11) NOT NULL,
   `Sale_ID` int(11) NOT NULL,
@@ -64,20 +64,20 @@ CREATE TABLE `Accounts_Receivable` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Accounts_Receivable`
+-- Dumping data for table `accounts_receivable`
 --
 
-INSERT INTO `Accounts_Receivable` (`AR_ID`, `Customer_ID`, `Sale_ID`, `Amount_Due`, `Due_Date`, `Payment_Status`, `Date_Paid`, `Remaining_Balance`) VALUES
+INSERT INTO `accounts_receivable` (`AR_ID`, `Customer_ID`, `Sale_ID`, `Amount_Due`, `Due_Date`, `Payment_Status`, `Date_Paid`, `Remaining_Balance`) VALUES
 (1, 1, 1, 150.00, '2026-04-10', 'Paid', '2026-04-02', 0.00),
 (2, 2, 2, 200.00, '2026-04-12', 'Unpaid', NULL, 200.00);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Audit_Log`
+-- Table structure for table `audit_log`
 --
 
-CREATE TABLE `Audit_Log` (
+CREATE TABLE `audit_log` (
   `Log_ID` int(11) NOT NULL,
   `User_ID` int(11) DEFAULT NULL,
   `Action_Type` varchar(20) NOT NULL,
@@ -89,10 +89,10 @@ CREATE TABLE `Audit_Log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Audit_Log`
+-- Dumping data for table `audit_log`
 --
 
-INSERT INTO `Audit_Log` (`Log_ID`, `User_ID`, `Action_Type`, `Table_Name`, `Record_ID`, `Timestamp`, `Old_Value`, `New_Value`) VALUES
+INSERT INTO `audit_log` (`Log_ID`, `User_ID`, `Action_Type`, `Table_Name`, `Record_ID`, `Timestamp`, `Old_Value`, `New_Value`) VALUES
 (1, 1, 'INSERT', 'sales', 1, '2026-04-16 15:15:35', NULL, 'New sale created'),
 (2, 2, 'UPDATE', 'inventory', 1, '2026-04-16 15:15:35', 'Quantity: 50', 'Quantity: 45'),
 (3, 1, 'DELETE', 'expenses', 2, '2026-04-16 15:15:35', 'Expense record', NULL);
@@ -100,10 +100,10 @@ INSERT INTO `Audit_Log` (`Log_ID`, `User_ID`, `Action_Type`, `Table_Name`, `Reco
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Customer`
+-- Table structure for table `customer`
 --
 
-CREATE TABLE `Customer` (
+CREATE TABLE `customer` (
   `Customer_ID` int(11) NOT NULL,
   `Name` varchar(100) NOT NULL,
   `Email` varchar(100) NOT NULL,
@@ -111,10 +111,10 @@ CREATE TABLE `Customer` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Customer`
+-- Dumping data for table `customer`
 --
 
-INSERT INTO `Customer` (`Customer_ID`, `Name`, `Email`, `Phone`) VALUES
+INSERT INTO `customer` (`Customer_ID`, `Name`, `Email`, `Phone`) VALUES
 (1, 'Jane Smith', 'jane@email.com', '555-2001'),
 (2, 'Carlos Rivera', 'carlos@email.com', '555-2002'),
 (3, 'Emily Tran', 'emily@email.com', '555-2003'),
@@ -131,13 +131,42 @@ INSERT INTO `Customer` (`Customer_ID`, `Name`, `Email`, `Phone`) VALUES
 (14, 'Noah Carter', 'noah.c@email.com', '555-2014'),
 (15, 'Destiny Flores', 'destiny.f@email.com', '555-2015');
 
+--
+-- Triggers `customer`
+--
+DELIMITER $$
+CREATE TRIGGER `log_deleted_customer` AFTER DELETE ON `customer` FOR EACH ROW BEGIN
+    INSERT INTO Deleted_Log (Table_Name, Record_ID, Deleted_Data)
+    VALUES (
+        'Customer',
+        OLD.Customer_ID,
+        CONCAT('Name: ', OLD.Name, ', Email: ', OLD.Email, ', Phone: ', OLD.Phone)
+    );
+END
+$$
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Employee`
+-- Table structure for table `deleted_log`
 --
 
-CREATE TABLE `Employee` (
+CREATE TABLE `deleted_log` (
+  `Log_ID` int(11) NOT NULL,
+  `Table_Name` varchar(50) DEFAULT NULL,
+  `Record_ID` int(11) DEFAULT NULL,
+  `Deleted_At` datetime DEFAULT current_timestamp(),
+  `Deleted_Data` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee`
+--
+
+CREATE TABLE `employee` (
   `Employee_ID` int(11) NOT NULL,
   `Employee_name` varchar(100) NOT NULL,
   `Phone` varchar(100) NOT NULL,
@@ -146,10 +175,10 @@ CREATE TABLE `Employee` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Employee`
+-- Dumping data for table `employee`
 --
 
-INSERT INTO `Employee` (`Employee_ID`, `Employee_name`, `Phone`, `Role`, `Hire_date`) VALUES
+INSERT INTO `employee` (`Employee_ID`, `Employee_name`, `Phone`, `Role`, `Hire_date`) VALUES
 (1, 'John Doe', '555-1001', 'Manager', '2022-03-15'),
 (2, 'Sarah Lane', '555-1002', 'Sales Rep', '2023-01-10'),
 (3, 'Mike Chen', '555-1003', 'Sales Rep', '2023-06-20'),
@@ -166,13 +195,28 @@ INSERT INTO `Employee` (`Employee_ID`, `Employee_name`, `Phone`, `Role`, `Hire_d
 (14, 'Lauren Hicks', '555-1014', 'Sales Rep', '2023-05-27'),
 (15, 'Chris Yamamoto', '555-1015', 'Accountant', '2022-12-03');
 
+--
+-- Triggers `employee`
+--
+DELIMITER $$
+CREATE TRIGGER `log_deleted_employee` AFTER DELETE ON `employee` FOR EACH ROW BEGIN
+    INSERT INTO Deleted_Log (Table_Name, Record_ID, Deleted_Data)
+    VALUES (
+        'Employee',
+        OLD.Employee_ID,
+        CONCAT('Name: ', OLD.Employee_name, ', Phone: ', OLD.Phone, ', Role: ', OLD.Role)
+    );
+END
+$$
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Employee_Records`
+-- Table structure for table `employee_records`
 --
 
-CREATE TABLE `Employee_Records` (
+CREATE TABLE `employee_records` (
   `Employee_ID` int(11) NOT NULL,
   `First_Name` varchar(50) NOT NULL,
   `Last_Name` varchar(50) NOT NULL,
@@ -185,20 +229,20 @@ CREATE TABLE `Employee_Records` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Employee_Records`
+-- Dumping data for table `employee_records`
 --
 
-INSERT INTO `Employee_Records` (`Employee_ID`, `First_Name`, `Last_Name`, `Role`, `Salary`, `Hire_Date`, `Department`, `Email`, `Phone`) VALUES
+INSERT INTO `employee_records` (`Employee_ID`, `First_Name`, `Last_Name`, `Role`, `Salary`, `Hire_Date`, `Department`, `Email`, `Phone`) VALUES
 (1, 'John', 'Doe', 'Manager', 60000.00, '2022-01-15', 'Sales', 'john.doe@email.com', '123-456-7890'),
 (2, 'Jane', 'Smith', 'Cashier', 35000.00, '2023-03-10', 'Operations', 'jane.smith@email.com', '987-654-3210');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Expenses`
+-- Table structure for table `expenses`
 --
 
-CREATE TABLE `Expenses` (
+CREATE TABLE `expenses` (
   `Expense_ID` int(11) NOT NULL,
   `Employee_ID` int(11) NOT NULL,
   `Category` varchar(100) NOT NULL,
@@ -207,10 +251,10 @@ CREATE TABLE `Expenses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Expenses`
+-- Dumping data for table `expenses`
 --
 
-INSERT INTO `Expenses` (`Expense_ID`, `Employee_ID`, `Category`, `Amount`, `Date`) VALUES
+INSERT INTO `expenses` (`Expense_ID`, `Employee_ID`, `Category`, `Amount`, `Date`) VALUES
 (1, 1, 'Travel', 150.00, '2024-01-05'),
 (2, 2, 'Supplies', 45.50, '2024-01-10'),
 (3, 3, 'Travel', 200.00, '2024-01-12'),
@@ -230,10 +274,10 @@ INSERT INTO `Expenses` (`Expense_ID`, `Employee_ID`, `Category`, `Amount`, `Date
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Expense_Reports`
+-- Table structure for table `expense_reports`
 --
 
-CREATE TABLE `Expense_Reports` (
+CREATE TABLE `expense_reports` (
   `Report_ID` int(11) NOT NULL,
   `Employee_ID` int(11) NOT NULL,
   `Total_Amount` decimal(10,2) NOT NULL,
@@ -244,20 +288,20 @@ CREATE TABLE `Expense_Reports` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Expense_Reports`
+-- Dumping data for table `expense_reports`
 --
 
-INSERT INTO `Expense_Reports` (`Report_ID`, `Employee_ID`, `Total_Amount`, `Report_Date`, `Approval_Status`, `Approved_By`, `Notes`) VALUES
+INSERT INTO `expense_reports` (`Report_ID`, `Employee_ID`, `Total_Amount`, `Report_Date`, `Approval_Status`, `Approved_By`, `Notes`) VALUES
 (1, 2, 300.00, '2026-04-05', 'Approved', 1, 'Office supplies and travel'),
 (2, 1, 120.50, '2026-04-06', 'Pending', NULL, 'Maintenance costs');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Financial_Transactions`
+-- Table structure for table `financial_transactions`
 --
 
-CREATE TABLE `Financial_Transactions` (
+CREATE TABLE `financial_transactions` (
   `Transaction_ID` int(11) NOT NULL,
   `Transaction_Date` date NOT NULL,
   `Transaction_Type` varchar(50) NOT NULL,
@@ -270,10 +314,10 @@ CREATE TABLE `Financial_Transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Financial_Transactions`
+-- Dumping data for table `financial_transactions`
 --
 
-INSERT INTO `Financial_Transactions` (`Transaction_ID`, `Transaction_Date`, `Transaction_Type`, `Amount`, `Payment_Method`, `Customer_ID`, `Employee_ID`, `Reference_ID`, `Status`) VALUES
+INSERT INTO `financial_transactions` (`Transaction_ID`, `Transaction_Date`, `Transaction_Type`, `Amount`, `Payment_Method`, `Customer_ID`, `Employee_ID`, `Reference_ID`, `Status`) VALUES
 (1, '2026-04-01', 'Sale', 150.00, 'Credit Card', 1, 1, 1, 'Completed'),
 (2, '2026-04-02', 'Expense', 75.50, 'Cash', NULL, 2, 1, 'Completed'),
 (3, '2026-04-03', 'Sale', 200.00, 'Debit Card', 2, 1, 2, 'Pending'),
@@ -284,20 +328,20 @@ INSERT INTO `Financial_Transactions` (`Transaction_ID`, `Transaction_Date`, `Tra
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Inventory`
+-- Table structure for table `inventory`
 --
 
-CREATE TABLE `Inventory` (
+CREATE TABLE `inventory` (
   `Inventory_ID` int(11) NOT NULL,
   `Product_ID` int(11) NOT NULL,
   `Quantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Inventory`
+-- Dumping data for table `inventory`
 --
 
-INSERT INTO `Inventory` (`Inventory_ID`, `Product_ID`, `Quantity`) VALUES
+INSERT INTO `inventory` (`Inventory_ID`, `Product_ID`, `Quantity`) VALUES
 (1, 1, 100),
 (2, 2, 75),
 (3, 3, 50),
@@ -317,10 +361,10 @@ INSERT INTO `Inventory` (`Inventory_ID`, `Product_ID`, `Quantity`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Payments`
+-- Table structure for table `payments`
 --
 
-CREATE TABLE `Payments` (
+CREATE TABLE `payments` (
   `Payment_ID` int(11) NOT NULL,
   `Sale_ID` int(11) NOT NULL,
   `Payment_date` date NOT NULL,
@@ -330,10 +374,10 @@ CREATE TABLE `Payments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Payments`
+-- Dumping data for table `payments`
 --
 
-INSERT INTO `Payments` (`Payment_ID`, `Sale_ID`, `Payment_date`, `Payment_method`, `Amount_paid`, `Payment_status`) VALUES
+INSERT INTO `payments` (`Payment_ID`, `Sale_ID`, `Payment_date`, `Payment_method`, `Amount_paid`, `Payment_status`) VALUES
 (1, 1, '2024-01-15', 'Credit Card', 79.98, 'Paid'),
 (2, 2, '2024-01-18', 'Cash', 99.99, 'Paid'),
 (3, 3, '2024-01-25', 'Credit Card', 149.98, 'Pending'),
@@ -353,20 +397,20 @@ INSERT INTO `Payments` (`Payment_ID`, `Sale_ID`, `Payment_date`, `Payment_method
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Product`
+-- Table structure for table `product`
 --
 
-CREATE TABLE `Product` (
+CREATE TABLE `product` (
   `Product_ID` int(11) NOT NULL,
   `Product_name` varchar(100) NOT NULL,
   `Price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Product`
+-- Dumping data for table `product`
 --
 
-INSERT INTO `Product` (`Product_ID`, `Product_name`, `Price`) VALUES
+INSERT INTO `product` (`Product_ID`, `Product_name`, `Price`) VALUES
 (1, 'Widget A', 29.99),
 (2, 'Widget B', 49.99),
 (3, 'Gadget Pro', 99.99),
@@ -383,13 +427,28 @@ INSERT INTO `Product` (`Product_ID`, `Product_name`, `Price`) VALUES
 (14, 'Monitor Riser', 24.99),
 (15, 'Cable Management Kit', 14.99);
 
+--
+-- Triggers `product`
+--
+DELIMITER $$
+CREATE TRIGGER `log_deleted_product` AFTER DELETE ON `product` FOR EACH ROW BEGIN
+    INSERT INTO Deleted_Log (Table_Name, Record_ID, Deleted_Data)
+    VALUES (
+        'Product',
+        OLD.Product_ID,
+        CONCAT('Name: ', OLD.Product_name, ', Price: ', OLD.Price)
+    );
+END
+$$
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Revenue_Streams`
+-- Table structure for table `revenue_streams`
 --
 
-CREATE TABLE `Revenue_Streams` (
+CREATE TABLE `revenue_streams` (
   `Revenue_ID` int(11) NOT NULL,
   `Revenue_Source` varchar(100) NOT NULL,
   `Description` varchar(255) DEFAULT NULL,
@@ -400,10 +459,10 @@ CREATE TABLE `Revenue_Streams` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Revenue_Streams`
+-- Dumping data for table `revenue_streams`
 --
 
-INSERT INTO `Revenue_Streams` (`Revenue_ID`, `Revenue_Source`, `Description`, `Amount`, `Date_Recorded`, `Sale_ID`, `Customer_ID`) VALUES
+INSERT INTO `revenue_streams` (`Revenue_ID`, `Revenue_Source`, `Description`, `Amount`, `Date_Recorded`, `Sale_ID`, `Customer_ID`) VALUES
 (1, 'Product Sales', 'Electronics purchase', 150.00, '2026-04-01', 1, 1),
 (2, 'Product Sales', 'Clothing purchase', 200.00, '2026-04-03', 2, 2),
 (3, 'Service', 'Installation service', 80.00, '2026-04-04', NULL, 1);
@@ -411,10 +470,10 @@ INSERT INTO `Revenue_Streams` (`Revenue_ID`, `Revenue_Source`, `Description`, `A
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Sales`
+-- Table structure for table `sales`
 --
 
-CREATE TABLE `Sales` (
+CREATE TABLE `sales` (
   `Sale_ID` int(11) NOT NULL,
   `Customer_ID` int(11) NOT NULL,
   `Employee_ID` int(11) NOT NULL,
@@ -423,10 +482,10 @@ CREATE TABLE `Sales` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Sales`
+-- Dumping data for table `sales`
 --
 
-INSERT INTO `Sales` (`Sale_ID`, `Customer_ID`, `Employee_ID`, `Date`, `Total_amount`) VALUES
+INSERT INTO `sales` (`Sale_ID`, `Customer_ID`, `Employee_ID`, `Date`, `Total_amount`) VALUES
 (1, 1, 2, '2024-01-15', 79.98),
 (2, 2, 3, '2024-01-18', 99.99),
 (3, 3, 2, '2024-01-20', 149.98),
@@ -446,10 +505,10 @@ INSERT INTO `Sales` (`Sale_ID`, `Customer_ID`, `Employee_ID`, `Date`, `Total_amo
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Sales_Reports`
+-- Table structure for table `sales_reports`
 --
 
-CREATE TABLE `Sales_Reports` (
+CREATE TABLE `sales_reports` (
   `Report_ID` int(11) NOT NULL,
   `Report_Date` date NOT NULL,
   `Total_Sales` decimal(10,2) NOT NULL,
@@ -460,20 +519,20 @@ CREATE TABLE `Sales_Reports` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Sales_Reports`
+-- Dumping data for table `sales_reports`
 --
 
-INSERT INTO `Sales_Reports` (`Report_ID`, `Report_Date`, `Total_Sales`, `Total_Revenue`, `Total_Transactions`, `Top_Product`, `Generated_By`) VALUES
+INSERT INTO `sales_reports` (`Report_ID`, `Report_Date`, `Total_Sales`, `Total_Revenue`, `Total_Transactions`, `Top_Product`, `Generated_By`) VALUES
 (1, '2026-04-07', 350.00, 350.00, 2, 'Laptop', 1),
 (2, '2026-04-08', 500.00, 500.00, 3, 'Smartphone', 2);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Sale_Product`
+-- Table structure for table `sale_product`
 --
 
-CREATE TABLE `Sale_Product` (
+CREATE TABLE `sale_product` (
   `Sale_ID` int(11) NOT NULL,
   `Product_ID` int(11) NOT NULL,
   `Quantity` int(11) NOT NULL,
@@ -481,10 +540,10 @@ CREATE TABLE `Sale_Product` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `Sale_Product`
+-- Dumping data for table `sale_product`
 --
 
-INSERT INTO `Sale_Product` (`Sale_ID`, `Product_ID`, `Quantity`, `Unit_price`) VALUES
+INSERT INTO `sale_product` (`Sale_ID`, `Product_ID`, `Quantity`, `Unit_price`) VALUES
 (1, 1, 2, 29.99),
 (1, 2, 1, 49.99),
 (2, 3, 1, 99.99),
@@ -512,119 +571,148 @@ INSERT INTO `Sale_Product` (`Sale_ID`, `Product_ID`, `Quantity`, `Unit_price`) V
 (15, 11, 1, 89.99);
 
 --
+-- Triggers `sale_product`
+--
+DELIMITER $$
+CREATE TRIGGER `after_sale_insert` AFTER INSERT ON `sale_product` FOR EACH ROW BEGIN
+    UPDATE Inventory
+    SET Quantity = Quantity - NEW.Quantity
+    WHERE Product_ID = NEW.Product_ID;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `before_sale_insert` BEFORE INSERT ON `sale_product` FOR EACH ROW BEGIN
+    DECLARE current_qty INT;
+    SELECT Quantity INTO current_qty FROM Inventory WHERE Product_ID = NEW.Product_ID;
+    IF current_qty < NEW.Quantity THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Insufficient inventory';
+    END IF;
+END
+$$
+DELIMITER ;
+
+--
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `Accounts_Payable`
+-- Indexes for table `accounts_payable`
 --
-ALTER TABLE `Accounts_Payable`
+ALTER TABLE `accounts_payable`
   ADD PRIMARY KEY (`AP_ID`),
   ADD KEY `Expense_ID` (`Expense_ID`);
 
 --
--- Indexes for table `Accounts_Receivable`
+-- Indexes for table `accounts_receivable`
 --
-ALTER TABLE `Accounts_Receivable`
+ALTER TABLE `accounts_receivable`
   ADD PRIMARY KEY (`AR_ID`),
   ADD KEY `Customer_ID` (`Customer_ID`),
   ADD KEY `Sale_ID` (`Sale_ID`);
 
 --
--- Indexes for table `Audit_Log`
+-- Indexes for table `audit_log`
 --
-ALTER TABLE `Audit_Log`
+ALTER TABLE `audit_log`
   ADD PRIMARY KEY (`Log_ID`),
   ADD KEY `User_ID` (`User_ID`);
 
 --
--- Indexes for table `Customer`
+-- Indexes for table `customer`
 --
-ALTER TABLE `Customer`
+ALTER TABLE `customer`
   ADD PRIMARY KEY (`Customer_ID`);
 
 --
--- Indexes for table `Employee`
+-- Indexes for table `deleted_log`
 --
-ALTER TABLE `Employee`
+ALTER TABLE `deleted_log`
+  ADD PRIMARY KEY (`Log_ID`);
+
+--
+-- Indexes for table `employee`
+--
+ALTER TABLE `employee`
   ADD PRIMARY KEY (`Employee_ID`);
 
 --
--- Indexes for table `Employee_Records`
+-- Indexes for table `employee_records`
 --
-ALTER TABLE `Employee_Records`
+ALTER TABLE `employee_records`
   ADD PRIMARY KEY (`Employee_ID`);
 
 --
--- Indexes for table `Expenses`
+-- Indexes for table `expenses`
 --
-ALTER TABLE `Expenses`
+ALTER TABLE `expenses`
   ADD PRIMARY KEY (`Expense_ID`),
   ADD KEY `fk_Employee_ID` (`Employee_ID`);
 
 --
--- Indexes for table `Expense_Reports`
+-- Indexes for table `expense_reports`
 --
-ALTER TABLE `Expense_Reports`
+ALTER TABLE `expense_reports`
   ADD PRIMARY KEY (`Report_ID`),
   ADD KEY `Employee_ID` (`Employee_ID`),
   ADD KEY `Approved_By` (`Approved_By`);
 
 --
--- Indexes for table `Financial_Transactions`
+-- Indexes for table `financial_transactions`
 --
-ALTER TABLE `Financial_Transactions`
+ALTER TABLE `financial_transactions`
   ADD PRIMARY KEY (`Transaction_ID`),
   ADD KEY `Customer_ID` (`Customer_ID`),
   ADD KEY `Employee_ID` (`Employee_ID`);
 
 --
--- Indexes for table `Inventory`
+-- Indexes for table `inventory`
 --
-ALTER TABLE `Inventory`
+ALTER TABLE `inventory`
   ADD PRIMARY KEY (`Inventory_ID`),
   ADD KEY `Product` (`Product_ID`);
 
 --
--- Indexes for table `Payments`
+-- Indexes for table `payments`
 --
-ALTER TABLE `Payments`
+ALTER TABLE `payments`
   ADD PRIMARY KEY (`Payment_ID`),
   ADD KEY `fk_to_sale_id` (`Sale_ID`);
 
 --
--- Indexes for table `Product`
+-- Indexes for table `product`
 --
-ALTER TABLE `Product`
+ALTER TABLE `product`
   ADD PRIMARY KEY (`Product_ID`);
 
 --
--- Indexes for table `Revenue_Streams`
+-- Indexes for table `revenue_streams`
 --
-ALTER TABLE `Revenue_Streams`
+ALTER TABLE `revenue_streams`
   ADD PRIMARY KEY (`Revenue_ID`),
   ADD KEY `Sale_ID` (`Sale_ID`),
   ADD KEY `Customer_ID` (`Customer_ID`);
 
 --
--- Indexes for table `Sales`
+-- Indexes for table `sales`
 --
-ALTER TABLE `Sales`
+ALTER TABLE `sales`
   ADD PRIMARY KEY (`Sale_ID`),
   ADD KEY `fk_to_Customer_ID` (`Customer_ID`),
   ADD KEY `fk_to_Employee_ID` (`Employee_ID`);
 
 --
--- Indexes for table `Sales_Reports`
+-- Indexes for table `sales_reports`
 --
-ALTER TABLE `Sales_Reports`
+ALTER TABLE `sales_reports`
   ADD PRIMARY KEY (`Report_ID`),
   ADD KEY `Generated_By` (`Generated_By`);
 
 --
--- Indexes for table `Sale_Product`
+-- Indexes for table `sale_product`
 --
-ALTER TABLE `Sale_Product`
+ALTER TABLE `sale_product`
   ADD PRIMARY KEY (`Sale_ID`,`Product_ID`),
   ADD KEY `fk_product_id` (`Product_ID`);
 
@@ -633,45 +721,51 @@ ALTER TABLE `Sale_Product`
 --
 
 --
--- AUTO_INCREMENT for table `Accounts_Payable`
+-- AUTO_INCREMENT for table `accounts_payable`
 --
-ALTER TABLE `Accounts_Payable`
+ALTER TABLE `accounts_payable`
   MODIFY `AP_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `Accounts_Receivable`
+-- AUTO_INCREMENT for table `accounts_receivable`
 --
-ALTER TABLE `Accounts_Receivable`
+ALTER TABLE `accounts_receivable`
   MODIFY `AR_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `Audit_Log`
+-- AUTO_INCREMENT for table `audit_log`
 --
-ALTER TABLE `Audit_Log`
+ALTER TABLE `audit_log`
   MODIFY `Log_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `Expense_Reports`
+-- AUTO_INCREMENT for table `deleted_log`
 --
-ALTER TABLE `Expense_Reports`
+ALTER TABLE `deleted_log`
+  MODIFY `Log_ID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `expense_reports`
+--
+ALTER TABLE `expense_reports`
   MODIFY `Report_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `Financial_Transactions`
+-- AUTO_INCREMENT for table `financial_transactions`
 --
-ALTER TABLE `Financial_Transactions`
+ALTER TABLE `financial_transactions`
   MODIFY `Transaction_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `Revenue_Streams`
+-- AUTO_INCREMENT for table `revenue_streams`
 --
-ALTER TABLE `Revenue_Streams`
+ALTER TABLE `revenue_streams`
   MODIFY `Revenue_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `Sales_Reports`
+-- AUTO_INCREMENT for table `sales_reports`
 --
-ALTER TABLE `Sales_Reports`
+ALTER TABLE `sales_reports`
   MODIFY `Report_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
@@ -679,88 +773,88 @@ ALTER TABLE `Sales_Reports`
 --
 
 --
--- Constraints for table `Accounts_Payable`
+-- Constraints for table `accounts_payable`
 --
-ALTER TABLE `Accounts_Payable`
+ALTER TABLE `accounts_payable`
   ADD CONSTRAINT `accounts_payable_ibfk_1` FOREIGN KEY (`Expense_ID`) REFERENCES `expenses` (`Expense_ID`);
 
 --
--- Constraints for table `Accounts_Receivable`
+-- Constraints for table `accounts_receivable`
 --
-ALTER TABLE `Accounts_Receivable`
+ALTER TABLE `accounts_receivable`
   ADD CONSTRAINT `accounts_receivable_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `customer` (`Customer_ID`),
   ADD CONSTRAINT `accounts_receivable_ibfk_2` FOREIGN KEY (`Sale_ID`) REFERENCES `sales` (`Sale_ID`);
 
 --
--- Constraints for table `Audit_Log`
+-- Constraints for table `audit_log`
 --
-ALTER TABLE `Audit_Log`
+ALTER TABLE `audit_log`
   ADD CONSTRAINT `audit_log_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `employee` (`Employee_ID`);
 
 --
--- Constraints for table `Employee_Records`
+-- Constraints for table `employee_records`
 --
-ALTER TABLE `Employee_Records`
+ALTER TABLE `employee_records`
   ADD CONSTRAINT `employee_records_ibfk_1` FOREIGN KEY (`Employee_ID`) REFERENCES `employee` (`Employee_ID`);
 
 --
--- Constraints for table `Expenses`
+-- Constraints for table `expenses`
 --
-ALTER TABLE `Expenses`
-  ADD CONSTRAINT `fk_Employee_ID` FOREIGN KEY (`Employee_ID`) REFERENCES `Employee` (`Employee_ID`);
+ALTER TABLE `expenses`
+  ADD CONSTRAINT `fk_Employee_ID` FOREIGN KEY (`Employee_ID`) REFERENCES `employee` (`Employee_ID`);
 
 --
--- Constraints for table `Expense_Reports`
+-- Constraints for table `expense_reports`
 --
-ALTER TABLE `Expense_Reports`
+ALTER TABLE `expense_reports`
   ADD CONSTRAINT `expense_reports_ibfk_1` FOREIGN KEY (`Employee_ID`) REFERENCES `employee` (`Employee_ID`),
   ADD CONSTRAINT `expense_reports_ibfk_2` FOREIGN KEY (`Approved_By`) REFERENCES `employee` (`Employee_ID`);
 
 --
--- Constraints for table `Financial_Transactions`
+-- Constraints for table `financial_transactions`
 --
-ALTER TABLE `Financial_Transactions`
+ALTER TABLE `financial_transactions`
   ADD CONSTRAINT `financial_transactions_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `customer` (`Customer_ID`),
   ADD CONSTRAINT `financial_transactions_ibfk_2` FOREIGN KEY (`Employee_ID`) REFERENCES `employee` (`Employee_ID`);
 
 --
--- Constraints for table `Inventory`
+-- Constraints for table `inventory`
 --
-ALTER TABLE `Inventory`
-  ADD CONSTRAINT `fk_to_product_id` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`);
+ALTER TABLE `inventory`
+  ADD CONSTRAINT `fk_to_product_id` FOREIGN KEY (`Product_ID`) REFERENCES `product` (`Product_ID`);
 
 --
--- Constraints for table `Payments`
+-- Constraints for table `payments`
 --
-ALTER TABLE `Payments`
-  ADD CONSTRAINT `fk_to_sale_id` FOREIGN KEY (`Sale_ID`) REFERENCES `Sales` (`Sale_ID`);
+ALTER TABLE `payments`
+  ADD CONSTRAINT `fk_to_sale_id` FOREIGN KEY (`Sale_ID`) REFERENCES `sales` (`Sale_ID`);
 
 --
--- Constraints for table `Revenue_Streams`
+-- Constraints for table `revenue_streams`
 --
-ALTER TABLE `Revenue_Streams`
+ALTER TABLE `revenue_streams`
   ADD CONSTRAINT `revenue_streams_ibfk_1` FOREIGN KEY (`Sale_ID`) REFERENCES `sales` (`Sale_ID`),
   ADD CONSTRAINT `revenue_streams_ibfk_2` FOREIGN KEY (`Customer_ID`) REFERENCES `customer` (`Customer_ID`);
 
 --
--- Constraints for table `Sales`
+-- Constraints for table `sales`
 --
-ALTER TABLE `Sales`
-  ADD CONSTRAINT `fk_to_Customer_ID` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`),
-  ADD CONSTRAINT `fk_to_Employee_ID` FOREIGN KEY (`Employee_ID`) REFERENCES `Employee` (`Employee_ID`);
+ALTER TABLE `sales`
+  ADD CONSTRAINT `fk_to_Customer_ID` FOREIGN KEY (`Customer_ID`) REFERENCES `customer` (`Customer_ID`),
+  ADD CONSTRAINT `fk_to_Employee_ID` FOREIGN KEY (`Employee_ID`) REFERENCES `employee` (`Employee_ID`);
 
 --
--- Constraints for table `Sales_Reports`
+-- Constraints for table `sales_reports`
 --
-ALTER TABLE `Sales_Reports`
+ALTER TABLE `sales_reports`
   ADD CONSTRAINT `sales_reports_ibfk_1` FOREIGN KEY (`Generated_By`) REFERENCES `employee` (`Employee_ID`);
 
 --
--- Constraints for table `Sale_Product`
+-- Constraints for table `sale_product`
 --
-ALTER TABLE `Sale_Product`
-  ADD CONSTRAINT `fk_product_id` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`),
-  ADD CONSTRAINT `fk_sale_id` FOREIGN KEY (`Sale_ID`) REFERENCES `Sales` (`Sale_ID`);
+ALTER TABLE `sale_product`
+  ADD CONSTRAINT `fk_product_id` FOREIGN KEY (`Product_ID`) REFERENCES `product` (`Product_ID`),
+  ADD CONSTRAINT `fk_sale_id` FOREIGN KEY (`Sale_ID`) REFERENCES `sales` (`Sale_ID`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
