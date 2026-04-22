@@ -1,6 +1,6 @@
 # FinCore Business Management System
 
-## 📌 Project Overview
+## Project Overview
 
 The FinCore Business Management System is a database-driven application designed to manage core business operations, including customer data, employee records, sales transactions, inventory tracking, and financial reporting. The system integrates multiple relational tables to ensure efficient data storage, retrieval, and analysis.
 
@@ -8,7 +8,7 @@ Files for database management project, fincore(2).sql has all the data with 15 d
 
 ---
 
-## 👥 Authors
+## Authors
 
 * Noel Mekogue - Project Manager
 * Haley Harper – Database Architect
@@ -19,15 +19,15 @@ Files for database management project, fincore(2).sql has all the data with 15 d
 
 ---
 
-## 📅 Creation Date
+## Creation Date
 
 * February 2026 – April 2026
 
 ---
 
-## 📁 File Structure
+## File Structure
 
-### 🔹 Database Files
+### Database Files
 
 * `FinCore(1).sql`
 
@@ -37,7 +37,7 @@ Files for database management project, fincore(2).sql has all the data with 15 d
 
 ---
 
-### 🔹 Frontend Files (from zip)
+### Frontend Files (from zip)
 
 * `index.php`
 
@@ -58,7 +58,7 @@ Files for database management project, fincore(2).sql has all the data with 15 d
 
 ---
 
-### 🔹 Database Tables
+### Database Tables
 
 Key tables included in the system:
 
@@ -81,7 +81,7 @@ Key tables included in the system:
 
 ---
 
-## ⚙️ System Features
+## System Features
 
 * Relational database with normalized structure
 * Use of primary and foreign keys to maintain data integrity
@@ -94,7 +94,7 @@ Key tables included in the system:
 
 ---
 
-## 📌 Summary
+## Summary
 
 This project demonstrates the design and implementation of a structured relational database system integrated with a frontend interface, supporting real-world business operations such as sales tracking, inventory management, and financial reporting.
 
