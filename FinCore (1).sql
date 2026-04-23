@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 21, 2026 at 11:50 PM
+-- Generation Time: Apr 23, 2026 at 04:30 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `fincoreupdate`
+-- Database: `fincore`
 --
 
 -- --------------------------------------------------------
@@ -343,17 +343,17 @@ CREATE TABLE `inventory` (
 
 INSERT INTO `inventory` (`Inventory_ID`, `Product_ID`, `Quantity`) VALUES
 (1, 1, 100),
-(2, 2, 75),
+(2, 2, 74),
 (3, 3, 50),
-(4, 4, 200),
+(4, 4, 198),
 (5, 5, 85),
-(6, 6, 60),
+(6, 6, 59),
 (7, 7, 45),
-(8, 8, 110),
+(8, 8, 220),
 (9, 9, 90),
 (10, 10, 30),
 (11, 11, 55),
-(12, 12, 25),
+(12, 12, 50),
 (13, 13, 140),
 (14, 14, 95),
 (15, 15, 175);
@@ -392,7 +392,30 @@ INSERT INTO `payments` (`Payment_ID`, `Sale_ID`, `Payment_date`, `Payment_method
 (12, 12, '2024-04-18', 'Cash', 164.98, 'Paid'),
 (13, 13, '2024-05-05', 'Credit Card', 54.98, 'Paid'),
 (14, 14, '2024-05-12', 'Debit Card', 149.99, 'Pending'),
-(15, 15, '2024-05-20', 'Cash', 109.98, 'Paid');
+(15, 15, '2024-05-20', 'Cash', 109.98, 'Paid'),
+(16, 23, '2026-04-23', 'Debit Card', 19.99, 'Paid');
+
+--
+-- Triggers `payments`
+--
+DELIMITER $$
+CREATE TRIGGER `before_payment_insert` BEFORE INSERT ON `payments` FOR EACH ROW BEGIN
+    IF NEW.Amount_paid <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Payment amount must be greater than zero';
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `before_payment_update` BEFORE UPDATE ON `payments` FOR EACH ROW BEGIN
+    IF NEW.Amount_paid <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Payment amount must be greater than zero';
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -500,7 +523,23 @@ INSERT INTO `sales` (`Sale_ID`, `Customer_ID`, `Employee_ID`, `Date`, `Total_amo
 (12, 12, 4, '2024-04-18', 164.98),
 (13, 13, 2, '2024-05-05', 54.98),
 (14, 14, 5, '2024-05-12', 149.99),
-(15, 15, 7, '2024-05-20', 109.98);
+(15, 15, 7, '2024-05-20', 109.98),
+(16, 12, 11, '2026-04-22', 49.99),
+(17, 2, 4, '2026-04-22', 19.99),
+(19, 2, 1, '2026-04-22', 899.90),
+(20, 2, 15, '2026-04-22', 239.98),
+(23, 12, 15, '2026-04-23', 19.99);
+
+--
+-- Triggers `sales`
+--
+DELIMITER $$
+CREATE TRIGGER `after_sale_created` AFTER INSERT ON `sales` FOR EACH ROW BEGIN
+    INSERT INTO payments (Sale_ID, Amount_paid, Payment_date, Payment_method, Payment_status)
+    VALUES (NEW.Sale_ID, NEW.Total_amount, NEW.Date, 'Pending', 'Unpaid');
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -568,27 +607,21 @@ INSERT INTO `sale_product` (`Sale_ID`, `Product_ID`, `Quantity`, `Unit_price`) V
 (13, 13, 1, 29.99),
 (14, 12, 1, 149.99),
 (15, 4, 1, 19.99),
-(15, 11, 1, 89.99);
+(15, 11, 1, 89.99),
+(16, 2, 1, 49.99),
+(17, 4, 1, 19.99),
+(19, 11, 10, 89.99),
+(20, 10, 2, 119.99),
+(23, 4, 1, 19.99);
 
 --
 -- Triggers `sale_product`
 --
 DELIMITER $$
 CREATE TRIGGER `after_sale_insert` AFTER INSERT ON `sale_product` FOR EACH ROW BEGIN
-    UPDATE Inventory
+    UPDATE inventory
     SET Quantity = Quantity - NEW.Quantity
     WHERE Product_ID = NEW.Product_ID;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `before_sale_insert` BEFORE INSERT ON `sale_product` FOR EACH ROW BEGIN
-    DECLARE current_qty INT;
-    SELECT Quantity INTO current_qty FROM Inventory WHERE Product_ID = NEW.Product_ID;
-    IF current_qty < NEW.Quantity THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Insufficient inventory';
-    END IF;
 END
 $$
 DELIMITER ;
@@ -757,10 +790,22 @@ ALTER TABLE `financial_transactions`
   MODIFY `Transaction_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `payments`
+--
+ALTER TABLE `payments`
+  MODIFY `Payment_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
 -- AUTO_INCREMENT for table `revenue_streams`
 --
 ALTER TABLE `revenue_streams`
   MODIFY `Revenue_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `sales`
+--
+ALTER TABLE `sales`
+  MODIFY `Sale_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `sales_reports`
@@ -782,8 +827,7 @@ ALTER TABLE `accounts_payable`
 -- Constraints for table `accounts_receivable`
 --
 ALTER TABLE `accounts_receivable`
-  ADD CONSTRAINT `accounts_receivable_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `customer` (`Customer_ID`),
-  ADD CONSTRAINT `accounts_receivable_ibfk_2` FOREIGN KEY (`Sale_ID`) REFERENCES `sales` (`Sale_ID`);
+  ADD CONSTRAINT `accounts_receivable_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `customer` (`Customer_ID`);
 
 --
 -- Constraints for table `audit_log`
